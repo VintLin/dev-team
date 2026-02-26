@@ -78,63 +78,26 @@
 - 高风险冲突判断（`review_human_attention`）
 - GitHub 最终 `approve`
 
-## 3. 推荐工作流（主 Agent）
+## 3. 推荐工作流与操作顺序
 
-### 阶段 A：规划
+### 规划与派工
 
-1. 明确目标（一个里程碑）
-2. 拆 2-5 个子任务（尽量边界清晰）
-3. 为每个任务定义：
-   - `repo/repo-path`
-   - `branch`
-   - `phase=build`
-   - `completion-mode`（优先 `pr`）
-   - DoD
-   - 输出格式
+1. 明确目标，拆 2-5 个子任务；为每任务定义 `repo-path` / `branch` / `phase=build` / `completion-mode=pr` / DoD。
+2. 派工：`scripts/spawn-agent.sh --agent auto --phase build`，长 prompt 用 `--prompt-file`。
+3. 监控：定期运行 `scripts/check-agents.sh`，看状态分布而非全量日志；脚本会处理重试、PR/CI 推进及可选的 cleanup/prune。
+4. PR 出现后运行 `scripts/review-agent.sh`，按聚合结论（`reviewAggregate`）：`review_changes_requested` → fixup；`review_human_attention` → 主 Agent 判断；`waiting_human_approve` → 等人类审批。
+5. 返工：`scripts/request-fixup.sh`，优先回原 SubAgent；只传聚合问题清单。
+6. 人类 approve → 合并 PR → 运行 `check-agents.sh` / `cleanup-worktrees.sh`，确认 worktree 与归档。
 
-### 阶段 B：派工
+### 标准操作顺序（每轮）
 
-使用 `scripts/spawn-agent.sh` 指派 SubAgent：
+1. 运行 `./scripts/check-agents.sh`
+2. 看状态分布，只列出本轮要处理的 1-3 件事
+3. 派工 / review / fixup 按需执行；最后人工 approve，合并后跑 check/cleanup/prune
 
-- 默认：`--agent auto --phase build`
-- 长 prompt 优先：`--prompt-file`
-- 自动化调用优先：`--prompt-b64`
+### 何时才看日志
 
-### 阶段 C：监控
-
-定期运行 `scripts/check-agents.sh`：
-
-- 观察状态变化，不要盯日志
-- 让脚本处理重试、PR/CI 状态推进
-- 脚本会自动触发 cleanup/prune（若配置开启）
-
-### 阶段 D：AI 审核（多 reviewer）
-
-当 PR 进入 review 阶段：
-
-- 运行 `scripts/review-agent.sh`（默认三审：`codex,gemini,claude`）
-- 读取聚合结论（`reviewAggregate`）
-- 按结论推进：
-  - `review_changes_requested` -> 发起 fixup
-  - `review_human_attention` -> 主 Agent 判断
-  - `waiting_human_approve` -> 等人类审批
-
-### 阶段 E：返工（可选）
-
-若聚合结论需要修改：
-
-- 运行 `scripts/request-fixup.sh`
-- 优先回原 SubAgent / 原分支处理
-- 只传聚合后的问题清单，不重复灌输全量背景
-
-### 阶段 F：合并与收口
-
-- 人类手动 `approve`
-- 合并 PR（或自动合并）
-- 运行 `check-agents.sh` / `cleanup-worktrees.sh`
-- 确认：
-  - worktree 已清理
-  - `active-tasks.json` 已归档降噪
+仅在：长时间无状态推进、重试后仍失败、`review_human_attention` 结论冲突、空壳会话/重启失败、SubAgent 产出与 prompt 明显不符。
 
 ## 4. Agent 指派策略（默认建议）
 
@@ -143,7 +106,7 @@
 - `gemini`：review（安全/扩展性）+ 边界清晰的 build/fixup
 - `claude`：前端迭代快；review 中低权重校验（critical 优先）
 
-实际以 `config/user.json -> agentPolicy` 为准。
+实际以 `config/user.json -> agentPolicy` 为准。各 agent 的详细角色、提示词适配与排障见 **references/agent-adapters.md**。
 
 ## 5. 主 Agent 的失败模式（必须避免）
 
@@ -179,12 +142,15 @@
 运行态（由 `spawn/check/review/fixup` 推进）：
 
 - `running`
+- `waiting_pr_ready`（PR 为 draft）
 - `waiting_checks`
 - `checks_failed`
 - `waiting_review`
+- `review_commented`（已发 AI 评论，待聚合/人工）
 - `review_changes_requested`
 - `review_human_attention`
 - `waiting_human_approve`
+- `changes_requested`（GitHub 审查要求修改）
 - `merge_ready`
 - `merge_queued`
 
@@ -229,43 +195,9 @@
 - `review_changes_requested`
 - `review_human_attention`
 
-## 8. 主 Agent 最小上下文操作法（合并版）
+## 8. 每轮最小上下文
 
-### 8.1 每轮开始只看这些
-
-- 当前里程碑目标（1 个）
-- 正在运行任务（`running`）
-- 需关注任务（`checks_failed` / `review_changes_requested` / `review_human_attention`）
-- 待你审批（`waiting_human_approve`）
-- 可合并（`merge_ready`）
-- 清理/归档是否积压（worktree 数量、`active-tasks` 大小）
-
-优先数据源：
-
-- `dev-board`（优先）
-- `active-tasks.json`
-- `./scripts/check-agents.sh` 输出摘要
-
-### 8.2 标准操作顺序（推荐）
-
-1. 运行 `./scripts/check-agents.sh`
-2. 看状态分布（不要先看全量日志）
-3. 只列出“本轮处理 1-3 件事”
-4. 派工（`spawn-agent.sh --phase build --completion-mode pr`）
-5. PR 出现后触发 `review-agent.sh`
-6. 若需修改，触发 `request-fixup.sh`
-7. 你手动 `approve`
-8. 合并后跑 `check/cleanup/prune`
-
-### 8.3 什么时候才看日志
-
-仅在这些情况：
-
-- 长时间无状态推进
-- 重试后仍失败
-- `review_human_attention` 结论冲突
-- `check-agents` 提示空壳会话/重启失败
-- SubAgent 产出与 prompt 明显不符
+每轮只看：当前目标、`running` 任务、需关注（`checks_failed` / `review_changes_requested` / `review_human_attention`）、待审批（`waiting_human_approve`）、可合并（`merge_ready`）、清理/归档是否积压。优先数据源：`dev-board`、`active-tasks.json`、`./scripts/check-agents.sh` 输出。
 
 ## 9. 任务队列与认领（Queue/Claim）设计（推荐演进）
 

@@ -126,11 +126,11 @@ for kw, weights in keyword_weights.items():
             reasons[agent].append(f"关键词:{kw}(+{delta})")
 
 # Heuristic from file extensions in prompt/description
-if re.search(r"\.(css|scss|html|tsx|jsx)\\b", text):
+if re.search(r"\.(css|scss|html|tsx|jsx)\b", text):
     for agent, delta in [("claude", 2), ("cursor", 2)]:
         scores[agent] += delta
         reasons[agent].append(f"前端文件信号(+{delta})")
-if re.search(r"\.(py|go|rs|java|kt|sql)\\b", text):
+if re.search(r"\.(py|go|rs|java|kt|sql)\b", text):
     scores["codex"] += 2
     reasons["codex"].append("后端/系统文件信号(+2)")
 

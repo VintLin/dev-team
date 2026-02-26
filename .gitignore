@@ -16,6 +16,7 @@ __pycache__/
 *.log
 active-tasks.json
 notifications.json
+tasks.json
 
 # Optional: 本地敏感配置（若需要可取消注释）
 # config/user.json

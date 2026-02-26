@@ -1,6 +1,6 @@
 # Agent Adapters (dev-team)
 
-本文档定义 `dev-team` 如何在完整流程中灵活使用 `codex / claude / gemini / cursor`，并说明可配置项。
+本文档与 **AGENTS.md §4（Agent 指派策略）、§7（状态机）** 互补：AGENTS 侧重编排流程与状态机，本文档侧重各 agent 的配置、角色与使用建议。
 
 ## 目标
 
@@ -19,12 +19,12 @@
     "phaseAllowedAgents": {
       "build": ["codex", "claude", "cursor", "gemini"],
       "review": ["codex", "gemini", "claude"],
-      "fixup": ["codex", "claude", "cursor"]
+      "fixup": ["codex", "claude", "cursor", "gemini"]
     },
     "phasePreferredOrder": {
       "build": ["codex", "claude", "cursor", "gemini"],
       "review": ["codex", "gemini", "claude"],
-      "fixup": ["codex", "claude", "cursor"]
+      "fixup": ["codex", "claude", "cursor", "gemini"]
     }
   }
 }

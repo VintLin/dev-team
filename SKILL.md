@@ -278,20 +278,7 @@ Queue/Claim 模式（推荐演进路径，现已提供最小可用版本）：
 - `active-tasks.json` 保存热数据（运行中 + 近期终态任务）
 - 历史记录归档到 `logs/archives/task-history-YYYY-MM.jsonl`
 
-推荐任务状态（状态机）：
-
-- `queued`: 已登记，尚未启动
-- `running`: subagent 运行中
-- `waiting_review`: 已产出代码/PR，等待审查
-- `changes_requested`: 审查要求修改
-- `approved`: 审查通过，待合并
-- `merged`: 已合并
-- `failed`: 执行失败（含重试耗尽）
-- `cancelled`: 人工取消
-- `cleaned`: worktree/分支已清理
-
-当前脚本默认使用的状态以 `running/done/failed/cancelled` 为主；如要扩展自动编排，建议按上面状态机升级。
-现已支持并使用部分 PR 状态机（尤其 `waiting_checks/checks_failed/waiting_review/merge_ready/merge_queued/merged`）。
+任务状态以脚本实现为准，详见 [references/state-machine.md](references/state-machine.md)。
 
 补充字段（新任务会记录）：
 - `requestedAgent`: 用户请求的 agent（可能是 `auto`）
@@ -302,59 +289,10 @@ Queue/Claim 模式（推荐演进路径，现已提供最小可用版本）：
 
 ## References
 
-详细文档：
-
-- **Prompt Templates**: [references/prompt-templates.md](references/prompt-templates.md)
-- **Subagent Task Contract**: 使用 `references/prompt-templates.md` 中的 `Subagent Task Contract` 模板作为派工提示词骨架（推荐）
-- **初始化设置**: [references/initialization.md](references/initialization.md) - Cron 配置
-
----
-
-## Interventions
-
-### 发送消息到运行中的代理
-
-```bash
-tmux send-keys -t <session-name> "你的指令" Enter
-```
-
-### 停止代理
-
-```bash
-tmux kill-session -t <session-name>
-```
-
----
-
-## CLI Reference
-
-### Codex
-```bash
-codex exec [OPTIONS] "prompt"
-  --dangerously-bypass-approvals-and-sandbox
-  -C, --cd <DIR>
-```
-
-### Claude Code
-```bash
-claude [OPTIONS] "prompt"
-  --dangerously-skip-permissions
-  -p, --print
-```
-
-### Gemini
-```bash
-gemini [OPTIONS] "prompt"
-  -y, --yolo
-```
-
-### Cursor
-```bash
-cursor agent [OPTIONS] "prompt"
-  -f, --force
-  --workspace <path>
-  --model <model>
-```
+- **状态机**: [references/state-machine.md](references/state-machine.md)
+- **CLI / tmux**: [references/cli-reference.md](references/cli-reference.md)
+- **Prompt 模板**: [references/prompt-templates.md](references/prompt-templates.md)（推荐 Subagent Task Contract）
+- **初始化 / Cron**: [references/initialization.md](references/initialization.md)
 
 ---
 

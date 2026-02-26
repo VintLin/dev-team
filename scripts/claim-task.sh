@@ -9,7 +9,6 @@ source "$SCRIPT_DIR/utils.sh" 2>/dev/null || true
 
 SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 QUEUE_FILE="$SKILL_DIR/tasks.json"
-LEGACY_QUEUE_FILE="$SKILL_DIR/queue/tasks.json"
 QUEUE_LOCK_DIR="${QUEUE_FILE}.lock"
 SPAWN_SCRIPT="$SKILL_DIR/scripts/spawn-agent.sh"
 RECOMMEND_SCRIPT="$SKILL_DIR/scripts/recommend-agent.sh"
@@ -50,10 +49,6 @@ done
 [[ "$FORMAT" =~ ^(text|json)$ ]] || { echo "Invalid --format" >&2; exit 1; }
 [[ -x "$SPAWN_SCRIPT" ]] || { echo "spawn-agent.sh not found/executable" >&2; exit 1; }
 
-mkdir -p "$(dirname "$QUEUE_FILE")"
-if [[ ! -f "$QUEUE_FILE" && -f "$LEGACY_QUEUE_FILE" ]]; then
-    cp "$LEGACY_QUEUE_FILE" "$QUEUE_FILE"
-fi
 [[ -f "$QUEUE_FILE" ]] || echo '{"items":[]}' > "$QUEUE_FILE"
 
 acquire_file_lock "$QUEUE_LOCK_DIR" 60 || exit 1

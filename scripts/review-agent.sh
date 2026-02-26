@@ -250,6 +250,7 @@ run_reviewer() {
     local reviewer="$1"
     local body_file="$2"
     local output_file="$3"
+    local snippet_file="${4:-}"
     local prompt
     local diff_context
     diff_context="$(cat "$PR_DIFF_EXCERPT_FILE" 2>/dev/null || echo 'Diff unavailable')"
@@ -356,11 +357,27 @@ run_reviewer() {
             ;;
         gemini)
             if command -v gemini >/dev/null 2>&1; then
-                cmd_desc="gemini -p"
+                cmd_desc="gemini (config)"
+                gemini_argv=()
+                if [[ -f "$SKILL_DIR/config/agents.json" ]]; then
+                    while IFS= read -r line; do
+                        [[ -n "$line" ]] && gemini_argv+=("$line")
+                    done < <(python3 -c "
+import json
+try:
+    d = json.load(open('$SKILL_DIR/config/agents.json', encoding='utf-8'))
+    args = d.get('agents', {}).get('gemini', {}).get('args', [])
+    for a in args:
+        print(a)
+except Exception:
+    print('-p')
+" 2>/dev/null)
+                fi
+                [[ ${#gemini_argv[@]} -eq 0 ]] && gemini_argv=(-p)
                 if [[ -n "$REPO_PATH" ]]; then
-                    _run_review_cmd "$output_file" "$REPO_PATH" gemini -p "$prompt" || ok=$?
+                    _run_review_cmd "$output_file" "$REPO_PATH" gemini "${gemini_argv[@]}" "$prompt" || ok=$?
                 else
-                    _run_review_cmd "$output_file" "" gemini -p "$prompt" || ok=$?
+                    _run_review_cmd "$output_file" "" gemini "${gemini_argv[@]}" "$prompt" || ok=$?
                 fi
             else
                 echo "gemini not installed" >"$output_file"
@@ -483,12 +500,12 @@ print(f"  - review: `{output_file}`")
 print(f"  - diff excerpt: `{diff_excerpt_file}`")
 PYEOF
 
-    python3 - <<PYEOF
+    # Write snippet for later merge (allows parallel run)
+    if [[ -n "$4" ]]; then
+        python3 - <<PYEOF
 import json
 from pathlib import Path
-p = Path("$TMP_RESULTS")
-d = json.loads(p.read_text(encoding="utf-8"))
-d["reviewers"].append({
+Path("$4").write_text(json.dumps({
   "name": "$reviewer",
   "command": "$cmd_desc",
   "exitCode": int("$ok"),
@@ -496,27 +513,54 @@ d["reviewers"].append({
   "outputFile": "$output_file",
   "commentFile": "$comment_file",
   "posted": False
-})
-p.write_text(json.dumps(d, ensure_ascii=False, indent=2), encoding="utf-8")
+}, ensure_ascii=False, indent=2), encoding="utf-8")
 PYEOF
+    fi
 }
 
+# Run all reviewers in parallel (each writes a snippet file)
 for reviewer in "${REVIEWER_ARRAY[@]}"; do
     reviewer="$(echo "$reviewer" | tr -d ' ')"
     [[ -z "$reviewer" ]] && continue
-    echo ""
-    echo "=== Running $reviewer review ==="
+    echo "=== Starting $reviewer review (parallel) ==="
     OUT_FILE="$REVIEW_LOG_DIR/pr-${PR_NUM}-${reviewer}-${TS}.out.txt"
     COMMENT_FILE="$REVIEW_LOG_DIR/pr-${PR_NUM}-${reviewer}-${TS}.comment.md"
-    run_reviewer "$reviewer" "$COMMENT_FILE" "$OUT_FILE"
+    SNIPPET_FILE="$REVIEW_LOG_DIR/pr-${PR_NUM}-${reviewer}-${TS}.snippet.json"
+    run_reviewer "$reviewer" "$COMMENT_FILE" "$OUT_FILE" "$SNIPPET_FILE" &
+done
+wait
+echo ""
 
+# Merge snippet files into TMP_RESULTS
+python3 - <<PYEOF
+import json
+from pathlib import Path
+tasks = Path("$TMP_RESULTS")
+data = json.loads(tasks.read_text(encoding="utf-8"))
+data["reviewers"] = []
+for s in Path("$REVIEW_LOG_DIR").glob("pr-${PR_NUM}-*-${TS}.snippet.json"):
+    try:
+        r = json.loads(s.read_text(encoding="utf-8"))
+        data["reviewers"].append(r)
+    except Exception:
+        pass
+tasks.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+PYEOF
+
+mv "$TMP_RESULTS" "$RESULTS_JSON"
+
+# Post PR comments (serial to avoid rate limits)
+for reviewer in "${REVIEWER_ARRAY[@]}"; do
+    reviewer="$(echo "$reviewer" | tr -d ' ')"
+    [[ -z "$reviewer" ]] && continue
+    COMMENT_FILE="$REVIEW_LOG_DIR/pr-${PR_NUM}-${reviewer}-${TS}.comment.md"
     if [[ "$POST_TO_GH" -eq 1 ]]; then
         echo "Posting PR comment for reviewer=$reviewer ..."
         if gh pr comment "$PR_NUM" --repo "$REPO" --body-file "$COMMENT_FILE" >/dev/null 2>&1; then
             python3 - <<PYEOF
 import json
 from pathlib import Path
-p = Path("$TMP_RESULTS")
+p = Path("$RESULTS_JSON")
 d = json.loads(p.read_text(encoding="utf-8"))
 for r in d.get("reviewers", []):
     if r.get("name") == "$reviewer":
@@ -529,8 +573,6 @@ PYEOF
         fi
     fi
 done
-
-mv "$TMP_RESULTS" "$RESULTS_JSON"
 
 AGGREGATE_OUTPUT=$("$SCRIPT_DIR/aggregate-reviews.sh" --file "$RESULTS_JSON" 2>/dev/null || true)
 if [[ -n "$AGGREGATE_OUTPUT" ]]; then

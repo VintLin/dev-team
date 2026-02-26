@@ -8,9 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh" 2>/dev/null || true
 
 SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-QUEUE_DIR="$SKILL_DIR/queue"
 QUEUE_FILE="$SKILL_DIR/tasks.json"
-LEGACY_QUEUE_FILE="$QUEUE_DIR/tasks.json"
 QUEUE_LOCK_DIR="${QUEUE_FILE}.lock"
 trap 'release_file_lock "$QUEUE_LOCK_DIR"' EXIT
 
@@ -126,10 +124,6 @@ PYEOF
 fi
 [[ -n "$PROMPT" ]] || { echo "Error: prompt is required (--prompt/--prompt-file/--prompt-b64)" >&2; exit 1; }
 
-mkdir -p "$QUEUE_DIR"
-if [[ ! -f "$QUEUE_FILE" && -f "$LEGACY_QUEUE_FILE" ]]; then
-    cp "$LEGACY_QUEUE_FILE" "$QUEUE_FILE"
-fi
 acquire_file_lock "$QUEUE_LOCK_DIR" 60 || exit 1
 
 DESC_B64=$(printf '%s' "$DESCRIPTION" | base64 | tr -d '\n')

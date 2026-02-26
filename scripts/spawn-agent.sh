@@ -20,7 +20,6 @@ fi
 
 # 使用公共函数获取路径
 SKILL_DIR="$(get_root_dir)"
-SKILL_DIR="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)"
 REPOS_BASE_DIR="$(dirname "$SKILL_DIR")"  # skill 上级目录作为仓库根目录
 TASKS_FILE="$SKILL_DIR/active-tasks.json"
 TASKS_LOCK_DIR="$(get_tasks_lock_dir)"
@@ -308,9 +307,6 @@ if ! check_agent_health "$AGENT"; then
     fi
 fi
 
-SESSION_NAME="${AGENT}-${SANITIZED_BRANCH}"
-LOG_FILE="$LOGS_DIR/${SESSION_NAME}.log"
-
 echo -e "${GREEN}Spawning $AGENT agent for: $DESCRIPTION${NC}"
 [[ -n "$AUTO_SELECTION_REASON" ]] && echo "Selection reason: $AUTO_SELECTION_REASON"
 [[ -n "$AGENT_MODEL" ]] && echo "Model override: $AGENT_MODEL"
@@ -580,7 +576,7 @@ data['agents'].append({
     'logFile': '$LOG_FILE',
     'launchScript': '$LAUNCH_SCRIPT',
     'prompt': base64.b64decode('$PROMPT_B64').decode('utf-8'),
-    'commandShell': base64.b64decode('$CMD_B64').decode('utf-8')
+    'commandShell': ''
 })
 
 data['activeCount'] = len([a for a in data['agents'] if a.get('status') == 'running'])
@@ -621,7 +617,7 @@ data = {
         'logFile': '$LOG_FILE',
         'launchScript': '$LAUNCH_SCRIPT',
         'prompt': base64.b64decode('$PROMPT_B64').decode('utf-8'),
-        'commandShell': base64.b64decode('$CMD_B64').decode('utf-8')
+        'commandShell': ''
     }],
     'maxAgents': $MAX_AGENTS,
     'activeCount': 1

@@ -21,8 +21,8 @@ TASKS_LOCK_DIR="$(get_tasks_lock_dir)"
 ARCHIVE_DIR="$SKILL_DIR/logs/archives"
 trap 'release_file_lock "$TASKS_LOCK_DIR"' EXIT
 
-KEEP_DAYS=7
-KEEP_COUNT=50
+KEEP_DAYS=0
+KEEP_COUNT=12
 KEEP_FAIL_CANCEL_DAYS=0
 KEEP_FAIL_CANCEL_COUNT=2
 DRY_RUN=false
@@ -35,8 +35,8 @@ usage() {
     echo "Usage: $0 [--keep-days <days>] [--keep-count <n>] [--keep-fail-cancel-days <days>] [--keep-fail-cancel-count <n>] [--dry-run]"
     echo ""
     echo "Options:"
-    echo "  --keep-days    Archive completed records older than N days (default: 7)"
-    echo "  --keep-count   Always keep the most recent N completed records (default: 50)"
+    echo "  --keep-days    Archive completed records older than N days (default: 0, use config archive.keepDays)"
+    echo "  --keep-count   Always keep the most recent N completed records (default: 12)"
     echo "  --keep-fail-cancel-days  Archive failed/cancelled older than N days (default: 0)"
     echo "  --keep-fail-cancel-count Always keep newest N failed/cancelled (default: 2)"
     echo "  --dry-run      Preview only, do not modify files"
