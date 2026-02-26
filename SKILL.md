@@ -34,6 +34,16 @@ One-person dev team orchestration using Levi as the orchestrator.
 scripts/setup-check.sh
 ```
 
+### 启动内置 dev-board 控制面板
+
+`dev-team` 已内置 `dev-board/`，可直接启动：
+
+```bash
+./scripts/run-dev-board.sh
+```
+
+默认地址：`http://localhost:4310`
+
 ### Spawn an Agent
 
 正式功能开发（推荐 `PR` 流程）：
@@ -42,7 +52,7 @@ scripts/setup-check.sh
 scripts/spawn-agent.sh \
   --agent auto \
   --phase build \
-  --repo-path /Users/Vint/仓库/monorepo/dev-board \
+  --repo-path ./dev-board \
   --branch feat/auth-timeout-fix \
   --description "修复登录超时错误" \
   --completion-mode pr \
@@ -54,7 +64,7 @@ scripts/spawn-agent.sh \
 ```bash
 scripts/spawn-agent.sh \
   --agent auto \
-  --repo-path /Users/Vint/仓库/monorepo/dev-board \
+  --repo-path ./dev-board \
   --branch fix/auth-error \
   --description "修复登录超时错误" \
   --phase build \
@@ -253,7 +263,7 @@ Queue/Claim 模式（推荐演进路径，现已提供最小可用版本）：
 示例：
 ```bash
 ./scripts/enqueue-task.sh \
-  --repo-path /Users/Vint/仓库/monorepo/dev-board \
+  --repo-path ./dev-board \
   --branch feat/dev-board-action-history \
   --description "dev-board 操作历史列表" \
   --phase build \
