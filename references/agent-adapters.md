@@ -1,6 +1,6 @@
 # Agent Adapters (dev-team)
 
-本文档与 **AGENTS.md §4（Agent 指派策略）、§7（状态机）** 互补：AGENTS 侧重编排流程与状态机，本文档侧重各 agent 的配置、角色与使用建议。
+本文档与 **[AGENTS.md](AGENTS.md) §4（Agent 指派策略）、§7（状态机）** 互补：AGENTS 侧重编排流程与状态机，本文档侧重各 agent 的配置、角色与使用建议。
 
 ## 目标
 
@@ -177,8 +177,8 @@
 - `spawn-agent` 成功但日志 0 字节：
   - 先跑 `./scripts/check-agents.sh`
   - 查看是否被判定为空壳会话并重试
-  - 查看 `active-tasks.json` 的 `launchScript` / `checks.lastUnhealthySessionReason`
+  - 查看 `assets/active-tasks.json` 的 `launchScript` / `checks.lastUnhealthySessionReason`
 - agent 能启动但任务不完成：
-  - 查看 `logs/<session>.log`
+  - 查看 `assets/logs/<session>.log`
   - 判断是“工具能力不匹配”还是“prompt 不清晰”
   - 对 Gemini：优先检查 `config/agents.json` 的 `--approval-mode yolo` 与 `--allowed-tools` 是否仍兼容当前 CLI 版本

@@ -1,6 +1,6 @@
 # 任务状态机（dev-team）
 
-与脚本实现一致的状态定义。主 Agent 编排时以 `active-tasks.json` 的 `status` 为准。
+与脚本实现一致的状态定义。主 Agent 编排时以 `assets/active-tasks.json` 的 `status` 为准。
 
 ## active-tasks 状态
 
@@ -31,7 +31,7 @@
 | `cancelled` | 人工取消 |
 | `cleaned` | worktree/分支已清理 |
 
-## 队列任务（tasks.json）
+## 队列任务（assets/tasks.json）
 
 - `queued` / `claimed` / `dispatched` / `dispatch_failed`
 
@@ -41,6 +41,6 @@
 - `check-agents.sh` → session 退出 `done`；PR 创建 `waiting_checks`；CI/merge 推进
 - `review-agent.sh` → `review_changes_requested` / `review_human_attention` / `waiting_human_approve` / `review_commented`
 - `cleanup-worktrees.sh` → `cleaned`
-- `prune-history.sh` → 归档终态到 `logs/archives/`
+- `prune-history.sh` → 归档终态到 `assets/logs/archives/`
 
-详见 AGENTS.md §7.3。
+详见 [AGENTS.md](AGENTS.md) §7.3。

@@ -22,7 +22,7 @@ function detectDefaultSkillDir() {
 
 const DEFAULT_SKILL_DIR = detectDefaultSkillDir();
 const TEAM_DEV_SKILL_DIR = process.env.TEAM_DEV_SKILL_DIR || DEFAULT_SKILL_DIR;
-const ARCHIVES_DIR = path.join(TEAM_DEV_SKILL_DIR, 'logs', 'archives');
+const ARCHIVES_DIR = path.join(TEAM_DEV_SKILL_DIR, 'assets', 'logs', 'archives');
 const RECENT_COMPLETED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 const STATUS_LABELS = {
@@ -422,7 +422,7 @@ function summarizeQueueState(queueState) {
 }
 
 function loadQueueState(options = {}) {
-  const sourcePath = path.join(TEAM_DEV_SKILL_DIR, 'tasks.json');
+  const sourcePath = path.join(TEAM_DEV_SKILL_DIR, 'assets', 'tasks.json');
   const sourceMeta = fileMeta(sourcePath);
   const rawRegistry = safeReadJson(sourcePath, { items: [], updatedAt: null, queueStats: null });
 
@@ -1039,7 +1039,7 @@ function resolveLogPath(task) {
     return path.resolve(TEAM_DEV_SKILL_DIR, task.logFile);
   }
   if (task.tmuxSession) {
-    return path.join(TEAM_DEV_SKILL_DIR, 'logs', `${task.tmuxSession}.log`);
+    return path.join(TEAM_DEV_SKILL_DIR, 'assets', 'logs', `${task.tmuxSession}.log`);
   }
   return null;
 }
@@ -1186,10 +1186,10 @@ function computeCounts(tasks, now = Date.now()) {
 }
 
 function loadBoardState() {
-  const tasksFile = path.join(TEAM_DEV_SKILL_DIR, 'active-tasks.json');
-  const notifyFile = path.join(TEAM_DEV_SKILL_DIR, 'notifications.json');
-  const cronLog = path.join(TEAM_DEV_SKILL_DIR, 'logs/cron.log');
-  const cleanupLog = path.join(TEAM_DEV_SKILL_DIR, 'logs/cleanup.log');
+  const tasksFile = path.join(TEAM_DEV_SKILL_DIR, 'assets', 'active-tasks.json');
+  const notifyFile = path.join(TEAM_DEV_SKILL_DIR, 'assets', 'notifications.json');
+  const cronLog = path.join(TEAM_DEV_SKILL_DIR, 'assets', 'logs', 'cron.log');
+  const cleanupLog = path.join(TEAM_DEV_SKILL_DIR, 'assets', 'logs', 'cleanup.log');
 
   const registry = safeReadJson(tasksFile, { agents: [], activeCount: 0 });
   const notifications = safeReadJson(notifyFile, []);

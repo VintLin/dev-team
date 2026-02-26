@@ -15,10 +15,10 @@ else
 fi
 
 SKILL_DIR="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)"
-QUEUE_FILE="$SKILL_DIR/tasks.json"
+QUEUE_FILE="$SKILL_DIR/assets/tasks.json"
 LEGACY_QUEUE_FILE="$SKILL_DIR/queue/tasks.json"
 QUEUE_LOCK_DIR="${QUEUE_FILE}.lock"
-ARCHIVE_DIR="$SKILL_DIR/logs/archives"
+ARCHIVE_DIR="$SKILL_DIR/assets/logs/archives"
 trap 'release_file_lock "$QUEUE_LOCK_DIR"' EXIT
 
 KEEP_DAYS=7

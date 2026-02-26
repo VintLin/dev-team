@@ -28,7 +28,7 @@ for (const file of checks) {
   }
 }
 
-const activeTasks = path.join(teamDevSkillDir, 'active-tasks.json');
+const activeTasks = path.join(teamDevSkillDir, 'assets', 'active-tasks.json');
 console.log(JSON.stringify({
   ok: true,
   root,

@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh" 2>/dev/null || true
 
 SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-QUEUE_FILE="$SKILL_DIR/tasks.json"
+QUEUE_FILE="$SKILL_DIR/assets/tasks.json"
 QUEUE_LOCK_DIR="${QUEUE_FILE}.lock"
 SPAWN_SCRIPT="$SKILL_DIR/scripts/spawn-agent.sh"
 RECOMMEND_SCRIPT="$SKILL_DIR/scripts/recommend-agent.sh"

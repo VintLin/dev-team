@@ -41,7 +41,7 @@ if [[ -n "$PROMPT_FILE" ]]; then
     PROMPT="$(cat "$PROMPT_FILE")"
 fi
 
-TASKS_FILE="$(get_tasks_file 2>/dev/null || echo "$(cd "$SCRIPT_DIR/.." && pwd)/active-tasks.json")"
+TASKS_FILE="$(get_tasks_file 2>/dev/null || echo "$(cd "$SCRIPT_DIR/.." && pwd)/assets/active-tasks.json")"
 AGENTS_CONFIG="$(get_agent_config 2>/dev/null || echo "$(cd "$SCRIPT_DIR/.." && pwd)/config/agents.json")"
 USER_CONFIG="$(get_user_config 2>/dev/null || echo "$(cd "$SCRIPT_DIR/.." && pwd)/config/user.json")"
 

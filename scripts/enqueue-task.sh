@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh" 2>/dev/null || true
 
 SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-QUEUE_FILE="$SKILL_DIR/tasks.json"
+QUEUE_FILE="$SKILL_DIR/assets/tasks.json"
 QUEUE_LOCK_DIR="${QUEUE_FILE}.lock"
 trap 'release_file_lock "$QUEUE_LOCK_DIR"' EXIT
 

@@ -109,10 +109,16 @@ repo_exists() {
 # 任务文件操作
 # ============================================================
 
+# 获取产出物目录路径
+get_assets_dir() {
+    local root_dir="$(get_root_dir)"
+    echo "$root_dir/assets"
+}
+
 # 获取任务文件路径
 get_tasks_file() {
     local root_dir="$(get_root_dir)"
-    echo "$root_dir/active-tasks.json"
+    echo "$root_dir/assets/active-tasks.json"
 }
 
 # 获取任务文件锁目录路径（mkdir 原子锁）
@@ -122,16 +128,22 @@ get_tasks_lock_dir() {
     echo "${tasks_file}.lock"
 }
 
+# 获取队列文件路径
+get_queue_file() {
+    local root_dir="$(get_root_dir)"
+    echo "$root_dir/assets/tasks.json"
+}
+
 # 获取通知文件路径
 get_notify_file() {
     local root_dir="$(get_root_dir)"
-    echo "$root_dir/notifications.json"
+    echo "$root_dir/assets/notifications.json"
 }
 
 # 获取日志目录路径
 get_logs_dir() {
     local root_dir="$(get_root_dir)"
-    echo "$root_dir/logs"
+    echo "$root_dir/assets/logs"
 }
 
 # ============================================================

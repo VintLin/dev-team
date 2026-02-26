@@ -36,7 +36,7 @@
 
 主 Agent 优先看结构化状态，而不是读长日志：
 
-- `active-tasks.json` 的状态字段
+- `assets/active-tasks.json` 的状态字段
 - `checks.*`（PR / CI / review / fixup）
 - `dev-board` 看板“需关注 / 待审批 / 待返工”
 - review 聚合结论（`reviewAggregate`），而不是逐条 reviewer 原文
@@ -165,7 +165,7 @@
 说明：
 
 - `cleaned` 表示资源（worktree/branch）已清理，不代表功能失败。
-- 终态任务会被 `prune-history.sh` 归档到 `logs/archives/*.jsonl`。
+- 终态任务会被 `prune-history.sh` 归档到 `assets/logs/archives/*.jsonl`。
 
 ### 7.3 状态推进（简版）
 
@@ -181,7 +181,7 @@
   - `review_human_attention`
   - `waiting_human_approve`
 - `cleanup-worktrees.sh`：资源回收后标记 `cleaned`
-- `prune-history.sh`：归档旧终态，保持 `active-tasks.json` 热数据规模
+- `prune-history.sh`：归档旧终态，保持 `assets/active-tasks.json` 热数据规模
 
 ### 7.4 Review 聚合（默认）
 
@@ -197,7 +197,7 @@
 
 ## 8. 每轮最小上下文
 
-每轮只看：当前目标、`running` 任务、需关注（`checks_failed` / `review_changes_requested` / `review_human_attention`）、待审批（`waiting_human_approve`）、可合并（`merge_ready`）、清理/归档是否积压。优先数据源：`dev-board`、`active-tasks.json`、`./scripts/check-agents.sh` 输出。
+每轮只看：当前目标、`running` 任务、需关注（`checks_failed` / `review_changes_requested` / `review_human_attention`）、待审批（`waiting_human_approve`）、可合并（`merge_ready`）、清理/归档是否积压。优先数据源：`dev-board`、`assets/active-tasks.json`、`./scripts/check-agents.sh` 输出。
 
 ## 9. 任务队列与认领（Queue/Claim）设计（推荐演进）
 
@@ -212,13 +212,13 @@
 
 ### 9.2 不建议直接复用 `active-tasks.json` 当队列
 
-`active-tasks.json` 目前是“运行态注册表 + 热历史”，职责已经较重。
+`assets/active-tasks.json` 目前是“运行态注册表 + 热历史”，职责已经较重。
 
 推荐拆分：
 
-- `tasks.json`（skill 根目录，队列文件）：待认领任务池（主 Agent 写）
-- `active-tasks.json`：已认领且运行中的任务注册表（系统写）
-- `logs/archives/*.jsonl`：历史归档（终态）
+- `assets/tasks.json`（队列文件）：待认领任务池（主 Agent 写）
+- `assets/active-tasks.json`：已认领且运行中的任务注册表（系统写）
+- `assets/logs/archives/*.jsonl`：历史归档（终态）
 
 ### 9.3 推荐任务卡 schema（最小版）
 
@@ -252,7 +252,7 @@
 1. 主 Agent 添加任务到队列（`status=queued`）
 2. 空闲 SubAgent（或调度器）按能力/阶段筛选并认领
 3. 原子更新任务为 `claimed`（写入 `claimedBy/claimedAt`）
-4. 调用 `spawn-agent.sh` 创建 worktree + tmux，并注册到 `active-tasks.json`
+4. 调用 `spawn-agent.sh` 创建 worktree + tmux，并注册到 `assets/active-tasks.json`
 5. 后续仍走现有流程：`check -> review -> fixup -> merge -> cleanup -> prune`
 
 ### 9.5 认领机制必须具备的能力

@@ -21,7 +21,7 @@ fi
 # 使用公共函数获取路径
 SKILL_DIR="$(get_root_dir)"
 REPOS_BASE_DIR="$(dirname "$SKILL_DIR")"  # skill 上级目录作为仓库根目录
-TASKS_FILE="$SKILL_DIR/active-tasks.json"
+TASKS_FILE="$SKILL_DIR/assets/active-tasks.json"
 TASKS_LOCK_DIR="$(get_tasks_lock_dir)"
 LOGS_DIR="$SKILL_DIR/logs"
 LAUNCHERS_DIR="$LOGS_DIR/launchers"

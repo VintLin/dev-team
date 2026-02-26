@@ -46,9 +46,9 @@ cron:
 crontab -e
 
 # 添加以下行
-*/10 * * * * cd /path/to/skills/dev-team && ./scripts/check-agents.sh >> ./logs/cron.log 2>&1
-0 3 * * * cd /path/to/skills/dev-team && ./scripts/cleanup-worktrees.sh >> ./logs/cleanup.log 2>&1
-10 3 * * * cd /path/to/skills/dev-team && ./scripts/prune-history.sh --keep-days 7 --keep-count 50 >> ./logs/prune.log 2>&1
+*/10 * * * * cd /path/to/skills/dev-team && ./scripts/check-agents.sh >> ./assets/logs/cron.log 2>&1
+0 3 * * * cd /path/to/skills/dev-team && ./scripts/cleanup-worktrees.sh >> ./assets/logs/cleanup.log 2>&1
+10 3 * * * cd /path/to/skills/dev-team && ./scripts/prune-history.sh --keep-days 7 --keep-count 50 >> ./assets/logs/prune.log 2>&1
 ```
 
 ### 方式 3: 使用 LaunchDaemon (macOS 开机自启)
@@ -99,12 +99,12 @@ launchctl load ~/Library/LaunchAgents/com.dev-team.agent-check.plist
 
 ## 日志位置
 
-- 监控日志: `logs/cron.log`
-- 清理日志: `logs/cleanup.log`
-- 归档日志: `logs/prune.log`
-- Agent 日志: `logs/`
-- 通知队列: `notifications.json`
-- 历史归档: `logs/archives/task-history-YYYY-MM.jsonl`
+- 监控日志: `assets/logs/cron.log`
+- 清理日志: `assets/logs/cleanup.log`
+- 归档日志: `assets/logs/prune.log`
+- Agent 日志: `assets/logs/`
+- 通知队列: `assets/notifications.json`
+- 历史归档: `assets/logs/archives/task-history-YYYY-MM.jsonl`
 
 ## 快速验证
 

@@ -124,13 +124,28 @@ for script in prune-history.sh cleanup-worktrees.sh check-agents.sh; do
 done
 echo ""
 
+# Migration: move legacy runtime files from root to assets/ (one-time)
+if [[ -f "$SKILL_DIR/active-tasks.json" ]] || [[ -f "$SKILL_DIR/tasks.json" ]] || [[ -f "$SKILL_DIR/notifications.json" ]] || [[ -d "$SKILL_DIR/logs" ]]; then
+    echo "Migrating legacy runtime files to assets/..."
+    mkdir -p "$SKILL_DIR/assets"
+    [[ -f "$SKILL_DIR/active-tasks.json" ]] && [[ ! -f "$SKILL_DIR/assets/active-tasks.json" ]] && mv "$SKILL_DIR/active-tasks.json" "$SKILL_DIR/assets/" && echo "  ✓ active-tasks.json"
+    [[ -f "$SKILL_DIR/tasks.json" ]] && [[ ! -f "$SKILL_DIR/assets/tasks.json" ]] && mv "$SKILL_DIR/tasks.json" "$SKILL_DIR/assets/" && echo "  ✓ tasks.json"
+    [[ -f "$SKILL_DIR/notifications.json" ]] && [[ ! -f "$SKILL_DIR/assets/notifications.json" ]] && mv "$SKILL_DIR/notifications.json" "$SKILL_DIR/assets/" && echo "  ✓ notifications.json"
+    if [[ -d "$SKILL_DIR/logs" ]] && [[ ! -d "$SKILL_DIR/assets/logs" ]]; then
+        mv "$SKILL_DIR/logs" "$SKILL_DIR/assets/"
+        echo "  ✓ logs/"
+    fi
+    echo ""
+fi
+
 # Check 7: Active tasks file
 echo "Checking task registry..."
-if [[ -f "$SKILL_DIR/active-tasks.json" ]]; then
+if [[ -f "$SKILL_DIR/assets/active-tasks.json" ]]; then
     echo -e "  ✓ active-tasks.json exists"
 else
     echo -e "  ⚠ active-tasks.json not found, will be created on first use"
-    echo '{}' > "$SKILL_DIR/active-tasks.json"
+    mkdir -p "$SKILL_DIR/assets"
+    echo '{}' > "$SKILL_DIR/assets/active-tasks.json"
 fi
 echo ""
 

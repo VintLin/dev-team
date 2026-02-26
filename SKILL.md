@@ -21,9 +21,9 @@ One-person dev team orchestration using Levi as the orchestrator.
 
 详细说明见：
 
-- `AGENTS.md`（主 Agent 行动准则）
-- （已合并入 `AGENTS.md`）编排模型与状态机
-- （已合并入 `AGENTS.md`）主 Agent 最小上下文操作手册
+- `references/AGENTS.md`（主 Agent 行动准则）
+- （已合并入 `references/AGENTS.md`）编排模型与状态机
+- （已合并入 `references/AGENTS.md`）主 Agent 最小上下文操作手册
 
 ## Quick Start
 
@@ -36,7 +36,7 @@ scripts/setup-check.sh
 
 ### 启动内置 dev-board 控制面板
 
-`dev-team` 已内置 `dev-board/`，可直接启动：
+`dev-team` 已内置 `scripts/dev-board/`，可直接启动：
 
 ```bash
 ./scripts/run-dev-board.sh
@@ -52,7 +52,7 @@ scripts/setup-check.sh
 scripts/spawn-agent.sh \
   --agent auto \
   --phase build \
-  --repo-path ./dev-board \
+  --repo-path ./scripts/dev-board \
   --branch feat/auth-timeout-fix \
   --description "修复登录超时错误" \
   --completion-mode pr \
@@ -64,7 +64,7 @@ scripts/spawn-agent.sh \
 ```bash
 scripts/spawn-agent.sh \
   --agent auto \
-  --repo-path ./dev-board \
+  --repo-path ./scripts/dev-board \
   --branch fix/auth-error \
   --description "修复登录超时错误" \
   --phase build \
@@ -75,7 +75,7 @@ scripts/spawn-agent.sh \
 ### Check Agent Status
 
 ```bash
-cat active-tasks.json
+cat assets/active-tasks.json
 ```
 
 ### Monitor Agents
@@ -150,12 +150,12 @@ scripts/check-agents.sh
 - 自动抓取 `gh pr diff` 并注入 reviewer prompt（截断版）
 - 每个 reviewer 单独在 PR 下发表评论（正文带 `[dev-team][reviewer=...]` 标识）
 - 会按 `config/user.json.agentPolicy` 过滤禁用/阶段不允许的 reviewer
-- 生成聚合结果 `logs/reviews/review-<pr>-<ts>.aggregate.json`
+- 生成聚合结果 `assets/logs/reviews/review-<pr>-<ts>.aggregate.json`
 - 聚合策略会结合 reviewer 权重、severity 和 reviewer 角色偏好，输出：
   - `waiting_human_approve`
   - `review_changes_requested`
   - `review_human_attention`
-- 写回 `active-tasks.json`：
+- 写回 `assets/active-tasks.json`：
   - `checks.reviewAggregate`
   - `checks.reviewSummary`
   - `checks.fixupSuggested`
@@ -167,7 +167,7 @@ scripts/check-agents.sh
 
 示例：
 ```bash
-./scripts/aggregate-reviews.sh --file logs/reviews/review-1-1234567890.json
+./scripts/aggregate-reviews.sh --file assets/logs/reviews/review-1-1234567890.json
 ```
 
 ### request-fixup.sh
@@ -208,7 +208,7 @@ scripts/check-agents.sh
 
 ### prune-history.sh
 
-归档 `active-tasks.json` 中过旧的已完成任务（`done/failed/cancelled/cleaned/...`），避免注册表无限增长。
+归档 `assets/active-tasks.json` 中过旧的已完成任务（`done/failed/cancelled/cleaned/...`），避免注册表无限增长。
 
 常用参数：
 - `--keep-days <days>`: 仅归档早于 N 天的记录（当前默认配置为 `0`，更偏热数据）
@@ -254,16 +254,16 @@ scripts/check-agents.sh
 
 Queue/Claim 模式（推荐演进路径，现已提供最小可用版本）：
 
-- `enqueue-task.sh`：主 Agent 添加任务到队列（`tasks.json`，skill 根目录）
+- `enqueue-task.sh`：主 Agent 添加任务到队列（`assets/tasks.json`）
 - `list-queue.sh`：查看队列（支持状态/阶段过滤）
 - `claim-task.sh`：认领一个 queued 任务并调用 `spawn-agent.sh` 派工
-- `sync-queue-status.sh`：根据 `active-tasks.json` 回写队列任务状态（`running/done/cleaned/...`）
-- `prune-queue-history.sh`：归档 `tasks.json` 中过旧终态队列任务到 `logs/archives/queue-history-YYYY-MM.jsonl`
+- `sync-queue-status.sh`：根据 `assets/active-tasks.json` 回写队列任务状态（`running/done/cleaned/...`）
+- `prune-queue-history.sh`：归档 `assets/tasks.json` 中过旧终态队列任务到 `assets/logs/archives/queue-history-YYYY-MM.jsonl`
 
 示例：
 ```bash
 ./scripts/enqueue-task.sh \
-  --repo-path ./dev-board \
+  --repo-path ./scripts/dev-board \
   --branch feat/dev-board-action-history \
   --description "dev-board 操作历史列表" \
   --phase build \
@@ -278,15 +278,15 @@ Queue/Claim 模式（推荐演进路径，现已提供最小可用版本）：
 
 ## Task Registry
 
-位置：`active-tasks.json` (skill 根目录)
+位置：`assets/active-tasks.json`
 
 编码约定：
 - 所有任务与通知 JSON 文件统一使用 UTF-8 保存
 - 写入时使用 `ensure_ascii=False`，中文会以可读形式保存（不再显示 `\\uXXXX`）
 
 归档约定：
-- `active-tasks.json` 保存热数据（运行中 + 近期终态任务）
-- 历史记录归档到 `logs/archives/task-history-YYYY-MM.jsonl`
+- `assets/active-tasks.json` 保存热数据（运行中 + 近期终态任务）
+- 历史记录归档到 `assets/logs/archives/task-history-YYYY-MM.jsonl`
 
 任务状态以脚本实现为准，详见 [references/state-machine.md](references/state-machine.md)。
 

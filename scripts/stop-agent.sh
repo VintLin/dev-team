@@ -18,7 +18,7 @@ else
 fi
 
 SKILL_DIR="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)"
-TASKS_FILE="$SKILL_DIR/active-tasks.json"
+TASKS_FILE="$SKILL_DIR/assets/active-tasks.json"
 TASKS_LOCK_DIR="$(get_tasks_lock_dir)"
 trap 'release_file_lock "$TASKS_LOCK_DIR"' EXIT
 

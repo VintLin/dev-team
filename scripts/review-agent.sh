@@ -14,9 +14,9 @@ fi
 
 SKILL_DIR="$(cd "$(dirname "$SCRIPT_DIR")" && pwd)"
 REPOS_BASE_DIR="$(dirname "$SKILL_DIR")"
-TASKS_FILE="$SKILL_DIR/active-tasks.json"
+TASKS_FILE="$SKILL_DIR/assets/active-tasks.json"
 TASKS_LOCK_DIR="$(get_tasks_lock_dir)"
-REVIEW_LOG_DIR="$SKILL_DIR/logs/reviews"
+REVIEW_LOG_DIR="$SKILL_DIR/assets/logs/reviews"
 trap 'release_file_lock "$TASKS_LOCK_DIR"' EXIT
 
 check_dependency "gh" "GitHub CLI" || exit 1

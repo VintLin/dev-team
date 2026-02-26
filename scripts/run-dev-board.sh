@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-DEV_BOARD_DIR="${SKILL_DIR}/dev-board"
+DEV_BOARD_DIR="${SCRIPT_DIR}/dev-board"
 
 if [[ ! -f "${DEV_BOARD_DIR}/apps/api/src/server.js" ]]; then
   echo "Error: embedded dev-board not found at ${DEV_BOARD_DIR}" >&2

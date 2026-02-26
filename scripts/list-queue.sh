@@ -6,7 +6,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-QUEUE_FILE="$SKILL_DIR/tasks.json"
+QUEUE_FILE="$SKILL_DIR/assets/tasks.json"
 LEGACY_QUEUE_FILE="$SKILL_DIR/queue/tasks.json"
 
 STATUS_FILTER=""
